@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html><head>
+<script type="module">
+  async function init() {
+    const wasm_strbuffer = atob("AGFzbQEAAAABCQJgAABgAn9/AAMDAgABBQMBABEGIQR/AUGAgMAAC38AQYCAwAALfwBBlM7AAAt/AEGgzsAACwczBQZtZW1vcnkCAAJnbwAABkJVRkZFUgMBCl9fZGF0YV9lbmQDAgtfX2hlYXBfYmFzZQMDCokEAskDAQZ/IwBBkM4AayIDJABBkM7AACgCAEEBaiECA0AgAEGAgEBrIgEgASgCAEH///93SxABQZDOwAAoAgBFBEAgAUGCwP14QYLA/QAgAkEBcRs2AgAgAkGIoANxaUEBcSACQQF0ciECCyAAQQRqIgBBkM4ARw0AC0EAIQBBkM7AAEGQzsAAKAIAQQFqIgE2AgAgAUEKcEUEQANAIAAgA2ogAEGAgEBrKAIAQf///3dLNgIAIABBBGoiAEGQzgBHDQALQYi1fyEBA0BBASEEIAFBxMzAAGogASADaiIAQfjKAGooAgAgAEHEzABqKAIAIgVqIABB/MoAaigCAGogAEGAywBqKAIAaiAAQcDMAGooAgBqIABByMwAaigCAGogAEGIzgBqKAIAaiAAQYzOAGooAgBqIABBkM4AaigCAGoiAEEDRwR/IABBBEYgBUEAR3EFQQELEAEgAUEEaiIBDQALQQAhAUGAgMAAIQADQCABQYCAQGsgAkEBcUUQASAAIAJBBHFFEAEgAEHIzABqIAJBCHFFEAEgAkGIoANxaUEBcSACQQF0ciECIABBBGohACABQcgBaiIBQZDOAEcNAAsLIANBkM4AaiQACzwBAX8gACgCACECIAAgAQR/IAJBgICAeHIFIAJBAnZBgICA/gNxQQNsQYCAgHhxIAJB////B3FyCzYCAAs=");
+    var wasm_codearray = new Uint8Array(wasm_strbuffer.length);
+    for (var i in wasm_strbuffer) wasm_codearray[i] = wasm_strbuffer.charCodeAt(i);
+    const { instance } = await WebAssembly.instantiate(wasm_codearray);
+
+        const width = 50;
+        const height = 50;
+
+        const canvas = document.getElementById("demo-canvas");
+        canvas.width = width;
+        canvas.height = height;
+
+        const buffer_address = instance.exports.BUFFER.value;
+        const image = new ImageData(
+            new Uint8ClampedArray(
+                instance.exports.memory.buffer,
+                buffer_address,
+                4 * width * height,
+            ),
+            width,
+        );
+
+        const ctx = canvas.getContext("2d");
+
+        const render = () => {
+          instance.exports.go();
+          ctx.putImageData(image, 0, 0);
+          setTimeout(render, 50);
+        };
+
+        render();
+  }
+  init();
+</script>
+</head>
+<body>
+<div style='position:relative; justify-content:center; image-rendering: crisp-edges; height:500px'>
+<canvas id="demo-canvas" style="position:absolute; height:100%;aspect-ratio:1;"></canvas>
+<div style="background-image:url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOG1tIiBoZWlnaHQ9IjhtbSIgdmlld0JveD0iMCAwIDcgNyIgdmVyc2lvbj0iMS4xIiBpZD0ic3ZnNSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczpzdmc9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KIDxyZWN0IHN0eWxlPSJmaWxsOiMwMDAwMDA7c3Ryb2tlLXdpZHRoOjEuMDtmaWxsLW9wYWNpdHk6MDtzdHJva2UtbWl0ZXJsaW1pdDo0O3N0cm9rZS1kYXNoYXJyYXk6bm9uZTtzdHJva2U6I2EwZWJiNztzdHJva2Utb3BhY2l0eToxIiBpZD0icmVjdDg0IiB3aWR0aD0iNyIgaGVpZ2h0PSI3IiB4PSIwIiB5PSIwIiAvPgo8L3N2Zz4K');background-size:2%;height:100%;position:absolute;aspect-ratio:1;"></div>
+</div></body>
+</html>
