@@ -4,11 +4,7 @@ use core::mem::MaybeUninit;
 use core::sync::atomic::{AtomicU32, Ordering};
 
 const ALPHA: u32 = 0xFF_00_00_00;
-
-#[panic_handler]
-fn handle_panic(_: &core::panic::PanicInfo) -> ! {
-    loop {}
-}
+const COLOUR: u32 = 0x00_FF_FF_FF;
 
 const WIDTH: usize = 50;
 const HEIGHT: usize = 50;
@@ -26,20 +22,13 @@ pub unsafe extern "C" fn go() {
 fn tick_lfsr(seed: u32) -> u32 {
     (seed << 1) | ((seed & 0b11010000_00001000).count_ones() & 1)
 }
-#[inline(always)]
-fn set_alive(pixel: &mut u32) {
-    *pixel = ALPHA | *pixel
-}
-#[inline(always)]
-fn set_dead(pixel: &mut u32) {
-    *pixel = (((*pixel & ALPHA) / 4 * 3) & ALPHA) | (*pixel & 0x00_FF_FF_FF)
-}
+
 #[inline(never)]
 fn set(pixel: &mut u32, alive: bool) {
     if alive {
-        set_alive(pixel)
+        *pixel = ALPHA | *pixel
     } else {
-        set_dead(pixel)
+        *pixel = (((*pixel & ALPHA) / 4 * 3) & ALPHA) | (*pixel & COLOUR)
     }
 }
 
@@ -91,4 +80,9 @@ fn render_frame(buffer: &mut [u32; WIDTH * HEIGHT]) {
             lfsr = tick_lfsr(lfsr);
         }
     }
+}
+
+#[panic_handler]
+fn handle_panic(_: &core::panic::PanicInfo) -> ! {
+    loop {}
 }
