@@ -6,7 +6,7 @@ PATH=$PATH:./.buildtools/bin
 
 rm -rf target
 
-echo -e "\033[1;32mStep 0 / 3\033[0m   Checking build requirements..."
+echo -e "\033[1;32mStep 0 / 4\033[0m   Checking build requirements..."
 if ! command -v cargo &> /dev/null; then
   echo -e "\033[1;31mError\033[0m        Missing rust toolchain"
   exit 1
@@ -37,14 +37,17 @@ if ! command -v wasm-opt &> /dev/null; then
   ln -s $(pwd)/.buildtools/binaryen/bin/wasm-opt .buildtools/bin/
 fi
   
-echo -e "\033[1;32mStep 1 / 3\033[0m   Building rust code..."
+echo -e "\033[1;32mStep 1 / 4\033[0m   Building rust code..."
 rustup target add wasm32-unknown-unknown
 cargo build --target wasm32-unknown-unknown --release
 
-echo -e "\033[1;32mStep 2 / 3\033[0m   Stripping symbols..."
+echo -e "\033[1;32mStep 2 / 4\033[0m   Stripping symbols..."
 wasm-strip target/wasm32-unknown-unknown/release/life.wasm
 
-echo -e "\033[1;32mStep 3 / 3\033[0m   Optimising wasm..."
+echo -e "\033[1;32mStep 3 / 4\033[0m   Optimising wasm..."
 wasm-opt -o target/wasm32-unknown-unknown/life-opt.wasm -Oz target/wasm32-unknown-unknown/release/life.wasm
 
 echo -e "Final program is $(stat -c%s target/wasm32-unknown-unknown/life-opt.wasm) bytes in size"
+
+echo -e "\033[1;32mStep 4 / 4\033[0m   Generating HTML..."
+./render index.html.template > index.html

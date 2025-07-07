@@ -18,5 +18,3 @@ jobs:
     - uses: actions/checkout@v4
     - name: Build
       run: ./build.sh
-    - name: Build HTML
-      run: ./render index.html.template index_new.html && diff index.html index_new.html

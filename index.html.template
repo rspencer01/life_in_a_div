@@ -3,7 +3,7 @@
 <script type="module">
   async function init() {
     const wasm_strbuffer = atob(
-% ./build.sh &> /dev/null 2>&1 && base64 -w0 target/wasm32-unknown-unknown/life-opt.wasm | awk '{print "\"" $0 "\""}'
+% base64 -w0 target/wasm32-unknown-unknown/life-opt.wasm | awk '{print "\"" $0 "\""}'
   );
     var wasm_codearray = new Uint8Array(wasm_strbuffer.length);
     for (var i in wasm_strbuffer) wasm_codearray[i] = wasm_strbuffer.charCodeAt(i);
