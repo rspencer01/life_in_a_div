@@ -38,6 +38,7 @@ if ! command -v wasm-opt &> /dev/null; then
 fi
   
 echo -e "\033[1;32mStep 1 / 3\033[0m   Building rust code..."
+rustup target add wasm32-unknown-unknown
 cargo build --target wasm32-unknown-unknown --release
 
 echo -e "\033[1;32mStep 2 / 3\033[0m   Stripping symbols..."
