@@ -1,45 +1,49 @@
-echo "<!DOCTYPE html>"
-echo "<html><head>"
-echo "<script type=\"module\">"
-echo "  async function init() {"
-echo "    const wasm_strbuffer = atob(\"$(./build.sh &> /dev/null 2>&1 && base64 -w0 target/wasm32-unknown-unknown/life-opt.wasm)\");"
-echo "    var wasm_codearray = new Uint8Array(wasm_strbuffer.length);"
-echo "    for (var i in wasm_strbuffer) wasm_codearray[i] = wasm_strbuffer.charCodeAt(i);"
-echo "    const { instance } = await WebAssembly.instantiate(wasm_codearray);"
-echo ""
-echo "        const width = 50;"
-echo "        const height = 50;"
-echo ""
-echo "        const canvas = document.getElementById(\"demo-canvas\");"
-echo "        canvas.width = width;"
-echo "        canvas.height = height;"
-echo ""
-echo "        const buffer_address = instance.exports.BUFFER.value;"
-echo "        const image = new ImageData("
-echo "            new Uint8ClampedArray("
-echo "                instance.exports.memory.buffer,"
-echo "                buffer_address,"
-echo "                4 * width * height,"
-echo "            ),"
-echo "            width,"
-echo "        );"
-echo ""
-echo "        const ctx = canvas.getContext(\"2d\");"
-echo ""
-echo "        const render = () => {"
-echo "          instance.exports.go();"
-echo "          ctx.putImageData(image, 0, 0);"
-echo "          setTimeout(render, 50);"
-echo "        };"
-echo ""
-echo "        render();"
-echo "  }"
-echo "  init();"
-echo "</script>"
-echo "</head>"
-echo "<body>"
-echo "<div style='position:relative; justify-content:center; image-rendering: crisp-edges; height:500px'>"
-echo "<canvas id=\"demo-canvas\" style=\"position:absolute; height:100%;aspect-ratio:1;\"></canvas>"
-echo "<div style=\"background-image:url('data:image/svg+xml;base64,$(base64 ./box.svg -w0)');background-size:2%;height:100%;position:absolute;aspect-ratio:1;\"></div>"
-echo "</div></body>"
-echo "</html>"
+<!DOCTYPE html>
+<html><head>
+<script type="module">
+  async function init() {
+    const wasm_strbuffer = atob(
+% ./build.sh &> /dev/null 2>&1 && base64 -w0 target/wasm32-unknown-unknown/life-opt.wasm | awk '{print "\"" $0 "\""}'
+  );
+    var wasm_codearray = new Uint8Array(wasm_strbuffer.length);
+    for (var i in wasm_strbuffer) wasm_codearray[i] = wasm_strbuffer.charCodeAt(i);
+    const { instance } = await WebAssembly.instantiate(wasm_codearray);
+
+        const width = 50;
+        const height = 50;
+
+        const canvas = document.getElementById("demo-canvas");
+        canvas.width = width;
+        canvas.height = height;
+
+        const buffer_address = instance.exports.BUFFER.value;
+        const image = new ImageData(
+            new Uint8ClampedArray(
+                instance.exports.memory.buffer,
+                buffer_address,
+                4 * width * height,
+            ),
+            width,
+        );
+
+        const ctx = canvas.getContext("2d");
+
+        const render = () => {
+          instance.exports.go();
+          ctx.putImageData(image, 0, 0);
+          setTimeout(render, 50);
+        };
+
+        render();
+  }
+  init();
+</script>
+</head>
+<body>
+<div style='position:relative; justify-content:center; image-rendering: crisp-edges; height:500px'>
+<canvas id="demo-canvas" style="position:absolute; height:100%;aspect-ratio:1;"></canvas>
+<div style='background-image:url(
+% base64 ./box.svg -w0 | awk '{print "\"data:image/svg+xml;base64," $0 "\""}'
+);background-size:2%;height:100%;position:absolute;aspect-ratio:1;'></div>
+</div></body>
+</html>
