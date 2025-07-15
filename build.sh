@@ -50,4 +50,9 @@ wasm-opt -o target/wasm32-unknown-unknown/life-opt.wasm -Oz target/wasm32-unknow
 echo -e "Final program is $(stat -c%s target/wasm32-unknown-unknown/life-opt.wasm) bytes in size"
 
 echo -e "\033[1;32mStep 4 / 4\033[0m   Generating HTML..."
-./render index.html.template > index.html
+# This is [render](https://robertandrewspencer.com/static_html_generator/)
+cat index.html.template | \
+  sed '/^% /! s/"/\\\"/g' | \
+  sed '/^% /! s/^\(.*\)/echo "\1"/' | \
+  sed "s/^% \(.*\)/\1/" | \
+  bash > index.html
